@@ -27,6 +27,7 @@ import uni.time.table.util.TimeTableAppUtil;
 public class TimeTableApplication extends Application {
 
   private TimetableService timetableService = new InMemoryTimeTableService();
+  private GridPane grid = new GridPane();
 
   public static void main(String[] args) {
     launch(args);
@@ -41,12 +42,13 @@ public class TimeTableApplication extends Application {
 
     ComboBox<String> groupSelector = new ComboBox<>();
     groupSelector.getItems().addAll(defaultTimeTable.group());
+    groupSelector.setValue(defaultTimeTable.group());
 
-    GridPane grid = new GridPane();
     grid.setAlignment(Pos.CENTER);
     grid.setHgap(120);
     grid.setVgap(120);
 
+    // Set up day labels
     for (DayOfWeek day : DayOfWeek.values()) {
       if (day.getValue() < 6) {
         Label label = new Label(day.toString());
@@ -54,18 +56,32 @@ public class TimeTableApplication extends Application {
       }
     }
 
+    // Set up time slot labels
     for (LessonSlot slot : LessonSlot.values()) {
       Label timeSlotLabel = new Label(slot.getFrom() + " - " + slot.getTo());
       grid.add(timeSlotLabel, 0, slot.ordinal() + 1);
     }
 
+    // Add the plus buttons or the lesson details for each slot
     for (int day = 1; day <= 5; day++) {
       for (int slot = 1; slot <= 6; slot++) {
-        Button plusButton = new Button("+");
+        Button slotButton = new Button("+");
         int finalDay = day;
         int finalSlot = slot;
-        plusButton.setOnAction(event -> showLessonCreationDialog(finalDay, finalSlot, groupSelector.getValue()));
-        grid.add(plusButton, day, slot);
+
+        // If there's already a lesson in this slot, show it
+        TimeTable timeTable = timetableService.findTimeTable(groupSelector.getValue());
+        Lesson existingLesson = findLessonForSlot(timeTable.lessons(), finalDay, finalSlot);
+        if (existingLesson != null) {
+          slotButton.setText(existingLesson.course().name() + "\n" + existingLesson.teacher().name());
+        } else {
+          slotButton.setOnAction(event -> showLessonCreationDialog(finalDay, finalSlot, groupSelector.getValue(), slotButton));
+        }
+
+        GridPane.setHgrow(slotButton, javafx.scene.layout.Priority.ALWAYS);
+        GridPane.setVgrow(slotButton, javafx.scene.layout.Priority.ALWAYS);
+
+        grid.add(slotButton, day, slot);
       }
     }
 
@@ -77,7 +93,7 @@ public class TimeTableApplication extends Application {
     stage.show();
   }
 
-  private void showLessonCreationDialog(int day, int slot, String group) {
+  private void showLessonCreationDialog(int day, int slot, String group, Button slotButton) {
     Stage dialog = new Stage();
     dialog.initModality(Modality.APPLICATION_MODAL);
     dialog.setTitle("Create Lesson");
@@ -93,9 +109,15 @@ public class TimeTableApplication extends Application {
       String courseName = courseField.getText();
       String teacherName = teacherField.getText();
       Lesson lesson = new Lesson(new Course(courseName), new Teacher(teacherName), DayOfWeek.of(day), LessonSlot.values()[slot - 1]);
+
+      // Update the timeTable with the new lesson
       TimeTable timeTable = timetableService.findTimeTable(group);
       List<Lesson> updatedLessons = Stream.concat(timeTable.lessons().stream(), Stream.of(lesson)).toList();
       timetableService.createTimeTable(new TimeTable(updatedLessons, group));
+
+      // Update the button text to show the lesson details
+      slotButton.setText(lesson.course().name() + "\n" + lesson.teacher().name());
+
       dialog.close();
     });
 
@@ -104,6 +126,15 @@ public class TimeTableApplication extends Application {
     Scene dialogScene = new Scene(dialogLayout, 800, 400);
     dialog.setScene(dialogScene);
     dialog.show();
+  }
+
+  private Lesson findLessonForSlot(List<Lesson> lessons, int day, int slot) {
+    for (Lesson lesson : lessons) {
+      if (lesson.dayOfWeek().getValue() == day && lesson.lessonSlot().ordinal() == slot - 1) {
+        return lesson;
+      }
+    }
+    return null; // No lesson found for this slot
   }
 
   private TimeTable createTestTimeTable() {
