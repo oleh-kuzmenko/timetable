@@ -2,6 +2,7 @@ package uni.time.table.util;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javafx.scene.paint.Color;
@@ -15,14 +16,12 @@ import uni.time.table.model.TimeTable;
 
 public class TimeTableAppUtil {
 
-  public static final String TIME_TABLE_TITLE = "Розклад занять";
-  public static final String TIMETABLE_FILE_NAME_SUFFIX = "-timetable.txt";
-
+  public static final String DEFAULT_GRAY_STYLE = "-fx-background-color: lightgray;";
   public static final Font DEFAULT_FONT = new Font("Arial Bold", 14);
   public static final Color DEFAULT_FONT_COLOR = Color.web("#333333");
 
-  private TimeTableAppUtil() {
-  }
+  public static final String TIME_TABLE_TITLE = "Розклад занять";
+  public static final String TIMETABLE_FILE_NAME_SUFFIX = "-timetable.txt";
 
   public static Lesson stringToLesson(String lesson) {
     String[] attributes = lesson.split(";");
@@ -32,6 +31,8 @@ public class TimeTableAppUtil {
 
   public static List<Lesson> stringToLessons(List<String> lessons) {
     return lessons.stream()
+        .filter(Objects::nonNull)
+        .filter(line -> !line.isBlank())
         .map(TimeTableAppUtil::stringToLesson)
         .toList();
   }

@@ -19,11 +19,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
 
+import org.springframework.stereotype.Component;
 import uni.time.table.model.Lesson;
 import uni.time.table.model.TimeTable;
 import uni.time.table.repository.TimetableRepository;
 import uni.time.table.util.TimeTableAppUtil;
 
+@Component
 public class FileTimeTableRepository implements TimetableRepository {
 
   private static final Logger LOGGER = Logger.getLogger(FileTimeTableRepository.class.getName());
@@ -42,6 +44,8 @@ public class FileTimeTableRepository implements TimetableRepository {
     try {
       return new TimeTable(Files.readAllLines(groupToPath(group))
           .stream()
+          .filter(Objects::nonNull)
+          .filter(line -> !line.isBlank())
           .map(TimeTableAppUtil::stringToLesson)
           .toList(), group);
     } catch (IOException e) {
@@ -105,7 +109,7 @@ public class FileTimeTableRepository implements TimetableRepository {
   @Override
   public void putLesson(String group, Lesson lesson) {
     try {
-      Files.writeString(groupToPath(group), lessonsToString(List.of(lesson)), StandardOpenOption.APPEND);
+      Files.writeString(groupToPath(group), "\n".concat(lessonsToString(List.of(lesson))), StandardOpenOption.APPEND);
     } catch (IOException e) {
       LOGGER.warning("Error adding lesson: %s".formatted(e.getMessage()));
     }

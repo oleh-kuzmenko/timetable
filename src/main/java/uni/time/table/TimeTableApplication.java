@@ -3,10 +3,7 @@ package uni.time.table;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import uni.time.table.repository.TimetableRepository;
-import uni.time.table.repository.implementation.FileTimeTableRepository;
-import uni.time.table.ui.LessonManager;
-import uni.time.table.ui.LabelManager;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import uni.time.table.ui.UIInitializer;
 
 public class TimeTableApplication extends Application {
@@ -18,11 +15,8 @@ public class TimeTableApplication extends Application {
 
   @Override
   public void start(Stage stage) {
-    TimetableRepository timetableRepository = new FileTimeTableRepository();
-    LabelManager labelManager = new LabelManager();
-    LessonManager lessonManager = new LessonManager(timetableRepository, labelManager);
-
-    UIInitializer initializer = new UIInitializer(timetableRepository, labelManager, lessonManager);
+    AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext("uni.time.table");
+    UIInitializer initializer = applicationContext.getBean(UIInitializer.class);
     initializer.initUI(stage);
   }
 
