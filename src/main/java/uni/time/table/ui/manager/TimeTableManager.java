@@ -186,4 +186,36 @@ public class TimeTableManager {
     dialog.setScene(dialogScene);
     dialog.showAndWait();
   }
+
+  public void showDeleteScheduleDialog(Stage stage, GridPane grid, ComboBox<String> groupSelector) {
+    Stage dialog = new Stage();
+    dialog.initModality(Modality.APPLICATION_MODAL);
+    dialog.initOwner(stage);
+    dialog.setTitle("Видалити розклад");
+
+    Label nameLabel = labelManager.buildDefaultLabel("Назва групи:");
+    TextField groupNameField = new TextField();
+    groupNameField.setMaxWidth(200);
+    groupNameField.setStyle(DEFAULT_GRAY_STYLE);
+
+    Button createButton = new Button("Видалити");
+    createButton.setStyle(DEFAULT_GRAY_STYLE);
+
+    createButton.setOnAction(event -> {
+      String groupName = groupNameField.getText().trim();
+      if (!groupName.isEmpty()) {
+        timetableRepository.deleteTimeTable(groupName);
+        groupSelector.getItems().removeIf(groupName::equals);
+        groupSelector.setValue(groupSelector.getItems().getLast());
+        dialog.close();
+      }
+    });
+
+    VBox dialogLayout = new VBox(10, nameLabel, groupNameField, createButton);
+    dialogLayout.setAlignment(Pos.CENTER);
+    Scene dialogScene = new Scene(dialogLayout, 300, 150);
+
+    dialog.setScene(dialogScene);
+    dialog.showAndWait();
+  }
 }

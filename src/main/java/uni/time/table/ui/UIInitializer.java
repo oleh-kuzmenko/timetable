@@ -59,8 +59,11 @@ public class UIInitializer {
     Menu scheduleMenu = new Menu("Розклад");
     MenuItem newScheduleItem = new MenuItem("Новий розклад");
     newScheduleItem.setOnAction(event -> timeTableManager.showNewScheduleDialog(stage, grid, groupSelector));
+    MenuItem deleteScheduleItem = new MenuItem("Видалити розклад");
+    deleteScheduleItem.setOnAction(event -> timeTableManager.showDeleteScheduleDialog(stage, grid, groupSelector));
 
     scheduleMenu.getItems().add(newScheduleItem);
+    scheduleMenu.getItems().add(deleteScheduleItem);
     menuBar.getMenus().add(scheduleMenu);
 
     HBox layout = new HBox(10, groupSelector, grid);
