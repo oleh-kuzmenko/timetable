@@ -19,6 +19,7 @@ import uni.time.table.model.TimeTable;
 import uni.time.table.repository.TimetableRepository;
 import uni.time.table.ui.manager.LabelManager;
 import uni.time.table.ui.manager.TimeTableManager;
+import uni.time.table.util.TimeTableAppUtil;
 
 @Component
 public class UIInitializer {
@@ -39,8 +40,11 @@ public class UIInitializer {
   }
 
   public void initUI(Stage stage) {
-//    TimeTableAppUtil.getDemoTimeTables().forEach(timetableRepository::createTimeTable);
     List<TimeTable> timeTables = timetableRepository.findAllTimeTables();
+    if (timeTables.isEmpty()) {
+      TimeTableAppUtil.getDemoTimeTables().forEach(timetableRepository::createTimeTable);
+      timeTables = timetableRepository.findAllTimeTables();
+    }
 
     GridPane grid = new GridPane(10, 10);
     grid.setGridLinesVisible(true);
