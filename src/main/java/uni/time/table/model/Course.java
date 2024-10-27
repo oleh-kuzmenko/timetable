@@ -1,5 +1,5 @@
 package uni.time.table.model;
 
-public record Course(String name) {
+public record Course(String title) {
 
 }
