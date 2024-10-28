@@ -6,7 +6,7 @@ import javafx.stage.Stage;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import uni.time.table.ui.UILoader;
 
-public class TimeTableApplication extends Application {
+public class TimetableApplication extends Application {
 
 
   public static void main(String[] args) {
