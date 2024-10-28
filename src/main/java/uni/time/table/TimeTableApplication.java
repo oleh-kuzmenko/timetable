@@ -4,7 +4,7 @@ package uni.time.table;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import uni.time.table.ui.UIInitializer;
+import uni.time.table.ui.UILoader;
 
 public class TimeTableApplication extends Application {
 
@@ -16,8 +16,8 @@ public class TimeTableApplication extends Application {
   @Override
   public void start(Stage stage) {
     AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext("uni.time.table");
-    UIInitializer initializer = applicationContext.getBean(UIInitializer.class);
-    initializer.initUI(stage);
+    UILoader initializer = applicationContext.getBean(UILoader.class);
+    initializer.load(stage);
   }
 
 }

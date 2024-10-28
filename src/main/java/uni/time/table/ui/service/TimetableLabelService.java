@@ -1,4 +1,4 @@
-package uni.time.table.ui.manager;
+package uni.time.table.ui.service;
 
 import static uni.time.table.util.TimeTableAppUtil.DEFAULT_FONT;
 import static uni.time.table.util.TimeTableAppUtil.DEFAULT_FONT_COLOR;
@@ -9,18 +9,18 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import uni.time.table.model.DayOfWeek;
 import uni.time.table.model.LessonSlot;
 
-@Component
-public class LabelManager {
+@Service
+public class TimetableLabelService {
 
   private static final String LESSON_SLOT_LABEL_TEMPLATE = "%s - %s";
 
-  public void addLessonSlotsColumnToGrid(GridPane grid) {
+  public void addLessonSlotsColumn(GridPane timetable) {
     Arrays.stream(LessonSlot.values())
-        .forEach(lessonSlot -> grid.add(buildTimeSlotLabel(lessonSlot), 0, lessonSlot.ordinal() + 1));
+        .forEach(lessonSlot -> timetable.add(buildTimeSlotLabel(lessonSlot), 0, lessonSlot.ordinal() + 1));
   }
 
   public void addWeekdayHeaders(GridPane gridPane) {

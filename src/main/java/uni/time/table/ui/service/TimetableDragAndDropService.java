@@ -1,4 +1,4 @@
-package uni.time.table.ui.manager;
+package uni.time.table.ui.service;
 
 import static uni.time.table.util.TimeTableAppUtil.DEFAULT_GRAY_STYLE;
 
@@ -7,13 +7,13 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.GridPane;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import uni.time.table.model.DayOfWeek;
 import uni.time.table.model.LessonSlot;
-import uni.time.table.ui.manager.action.MoveLessonAction;
+import uni.time.table.ui.action.MoveLessonAction;
 
-@Component
-public class DragAndDropManager {
+@Service
+public class TimetableDragAndDropService {
 
   public void setupDragAndDrop(Button lessonButton, DayOfWeek day, LessonSlot slot) {
     lessonButton.setOnDragDetected(event -> {
@@ -25,7 +25,7 @@ public class DragAndDropManager {
     });
   }
 
-  public void setupDragAndDropTarget(GridPane gridPane, Button targetButton, DayOfWeek targetDay, LessonSlot targetSlot,
+  public void setupDragAndDropTarget(GridPane timetable, Button targetButton, DayOfWeek targetDay, LessonSlot targetSlot,
       String group, MoveLessonAction moveLessonAction) {
     targetButton.setOnDragOver(event -> {
       if (event.getGestureSource() != targetButton && event.getDragboard().hasString()) {
@@ -48,7 +48,7 @@ public class DragAndDropManager {
         DayOfWeek sourceDay = DayOfWeek.valueOf(sourceInfo[0]);
         LessonSlot sourceSlot = LessonSlot.values()[Integer.parseInt(sourceInfo[1])];
 
-        moveLessonAction.moveLesson(gridPane, group, sourceDay, sourceSlot, targetDay, targetSlot);
+        moveLessonAction.move(timetable, group, sourceDay, sourceSlot, targetDay, targetSlot);
         event.setDropCompleted(true);
       }
       event.consume();

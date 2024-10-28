@@ -17,74 +17,75 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import org.springframework.stereotype.Component;
 import uni.time.table.model.Lesson;
-import uni.time.table.model.TimeTable;
-import uni.time.table.repository.TimetableRepository;
+import uni.time.table.model.Schedule;
+import uni.time.table.repository.ScheduleRepository;
 import uni.time.table.util.TimeTableAppUtil;
 
 @Component
-public class FileTimeTableRepository implements TimetableRepository {
+public class FileScheduleRepository implements ScheduleRepository {
 
-  private static final Logger LOGGER = Logger.getLogger(FileTimeTableRepository.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(FileScheduleRepository.class.getName());
 
   @Override
-  public void createTimeTable(TimeTable timeTable) {
+  public void create(Schedule schedule) {
     try {
-      Files.writeString(groupToPath(timeTable.group()), lessonsToString(timeTable.lessons()));
+      Files.writeString(groupToPath(schedule.group()), lessonsToString(schedule.lessons()));
     } catch (IOException e) {
-      LOGGER.warning("Error creating timetable: %s".formatted(e.getMessage()));
+      LOGGER.warning("Error creating schedule: %s".formatted(e.getMessage()));
     }
   }
 
   @Override
-  public TimeTable findTimeTable(String group) {
+  public Optional<Schedule> find(String group) {
     try {
-      return new TimeTable(Files.readAllLines(groupToPath(group))
+      return Optional.of(new Schedule(Files.readAllLines(groupToPath(group))
           .stream()
           .filter(Objects::nonNull)
           .filter(line -> !line.isBlank())
           .map(TimeTableAppUtil::stringToLesson)
-          .toList(), group);
+          .toList(), group));
     } catch (IOException e) {
-      LOGGER.warning("Error finding timetable: %s".formatted(e.getMessage()));
-      return null;
+      LOGGER.warning("Error finding schedule: %s".formatted(e.getMessage()));
+      return Optional.empty();
     }
   }
 
   @Override
-  public void deleteTimeTable(String group) {
+  public void delete(String group) {
     try {
       Files.delete(groupToPath(group));
     } catch (IOException e) {
-      LOGGER.warning("Error deleting timetable: %s".formatted(e.getMessage()));
+      LOGGER.warning("Error deleting schedule: %s".formatted(e.getMessage()));
     }
   }
 
   @Override
-  public List<TimeTable> findAllTimeTables() {
+  public List<Schedule> findAll() {
     List<Path> files = new ArrayList<>();
     try {
       Files.walkFileTree(Path.of(""), new SimpleFileVisitor<>() {
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-          if (file.getFileName().toString().matches(".*-timetable\\.txt")) {
+          if (file.getFileName().toString().matches(".*-schedule\\.txt")) {
             files.add(file.getFileName());
           }
           return FileVisitResult.CONTINUE;
         }
       });
     } catch (IOException e) {
-      LOGGER.warning("Error finding timetables: %s".formatted(e.getMessage()));
+      LOGGER.warning("Error finding schedule: %s".formatted(e.getMessage()));
     }
     return files.stream()
         .map(f -> {
           try {
-            return new TimeTable(stringToLessons(Files.readAllLines(f)), pathToGroup(f));
+            return new Schedule(stringToLessons(Files.readAllLines(f)), pathToGroup(f));
           } catch (IOException e) {
-            LOGGER.warning("Error finding timetables: %s".formatted(e.getMessage()));
+            LOGGER.warning("Error finding schedule: %s".formatted(e.getMessage()));
             return null;
           }
         })

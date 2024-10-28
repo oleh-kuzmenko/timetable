@@ -12,7 +12,7 @@ import uni.time.table.model.DayOfWeek;
 import uni.time.table.model.Lesson;
 import uni.time.table.model.LessonSlot;
 import uni.time.table.model.Teacher;
-import uni.time.table.model.TimeTable;
+import uni.time.table.model.Schedule;
 
 public class TimeTableAppUtil {
 
@@ -20,8 +20,7 @@ public class TimeTableAppUtil {
   public static final Font DEFAULT_FONT = new Font("Arial Bold", 14);
   public static final Color DEFAULT_FONT_COLOR = Color.web("#333333");
 
-  public static final String TIME_TABLE_TITLE = "Розклад занять";
-  public static final String TIMETABLE_FILE_NAME_SUFFIX = "-timetable.txt";
+  public static final String TIMETABLE_FILE_NAME_SUFFIX = "-schedule.txt";
 
   public static Lesson stringToLesson(String lesson) {
     String[] attributes = lesson.split(";");
@@ -52,8 +51,8 @@ public class TimeTableAppUtil {
     return file.getFileName().toString().replace(TIMETABLE_FILE_NAME_SUFFIX, "");
   }
 
-  public static List<TimeTable> getDemoTimeTables() {
-    return List.of(new TimeTable(
+  public static List<Schedule> getDemoTimeTables() {
+    return List.of(new Schedule(
         List.of(
             new Lesson(new Course("Алгоритми та структури даних"), new Teacher("Коваль Олександр"), DayOfWeek.MONDAY, LessonSlot.FIRST),
             new Lesson(new Course("Дискретна математика"), new Teacher("Шевченко Ірина"), DayOfWeek.MONDAY, LessonSlot.SECOND),
@@ -74,7 +73,7 @@ public class TimeTableAppUtil {
                 LessonSlot.THIRD)
         ),
         "CS-101"
-    ), new TimeTable(
+    ), new Schedule(
         List.of(
             new Lesson(new Course("Розробка веб-додатків"), new Teacher("Петрова Марія"), DayOfWeek.MONDAY, LessonSlot.FIRST),
             new Lesson(new Course("Безпека мереж"), new Teacher("Денисенко Олексій"), DayOfWeek.MONDAY, LessonSlot.SECOND),

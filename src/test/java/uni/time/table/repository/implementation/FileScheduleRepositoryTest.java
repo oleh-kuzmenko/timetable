@@ -2,7 +2,6 @@ package uni.time.table.repository.implementation;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uni.time.table.util.TimeTableAppUtil.groupToPath;
 
@@ -15,9 +14,9 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uni.time.table.model.Course;
@@ -25,18 +24,18 @@ import uni.time.table.model.DayOfWeek;
 import uni.time.table.model.Lesson;
 import uni.time.table.model.LessonSlot;
 import uni.time.table.model.Teacher;
-import uni.time.table.model.TimeTable;
-import uni.time.table.repository.TimetableRepository;
+import uni.time.table.model.Schedule;
+import uni.time.table.repository.ScheduleRepository;
 
-class FileTimeTableRepositoryTest {
+class FileScheduleRepositoryTest {
 
   private static final String TEST_GROUP = "CS-102";
 
-  private TimetableRepository timetableRepository;
+  private ScheduleRepository scheduleRepository;
 
   @BeforeEach
   void setUp() {
-    timetableRepository = new FileTimeTableRepository();
+    scheduleRepository = new FileScheduleRepository();
   }
 
   @AfterEach
@@ -45,7 +44,7 @@ class FileTimeTableRepositoryTest {
     Files.walkFileTree(Paths.get(""), new SimpleFileVisitor<>() {
       @Override
       public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-        if (file.getFileName().toString().matches(".*-timetable\\.txt")) {
+        if (file.getFileName().toString().matches(".*-schedule\\.txt")) {
           files.add(file.getFileName());
         }
         return FileVisitResult.CONTINUE;
@@ -57,12 +56,12 @@ class FileTimeTableRepositoryTest {
   }
 
   @Test
-  void shouldCreateTimeTable() throws IOException {
-    TimeTable timeTable = createTestTimeTable(TEST_GROUP);
+  void shouldCreate() throws IOException {
+    Schedule schedule = createTestTimeTable(TEST_GROUP);
 
-    assertDoesNotThrow(() -> timetableRepository.createTimeTable(timeTable));
+    assertDoesNotThrow(() -> scheduleRepository.create(schedule));
 
-    assertTrue(Files.exists(Path.of(TEST_GROUP.concat("-timetable.txt"))));
+    assertTrue(Files.exists(Path.of(TEST_GROUP.concat("-schedule.txt"))));
     List<String> lessons = Files.readAllLines(groupToPath(TEST_GROUP));
     assertEquals(4, lessons.size());
     assertEquals("Комп'ютерне зір;Левченко Костянтин;FRIDAY;SECOND", lessons.get(0));
@@ -72,14 +71,15 @@ class FileTimeTableRepositoryTest {
   }
 
   @Test
-  void shouldFindTimeTable() {
-    TimeTable timeTable = createTestTimeTable(TEST_GROUP);
-    timetableRepository.createTimeTable(timeTable);
+  void shouldFind() {
+    Schedule schedule = createTestTimeTable(TEST_GROUP);
+    scheduleRepository.create(schedule);
 
-    TimeTable actualTimeTable = timetableRepository.findTimeTable(TEST_GROUP);
+    Optional<Schedule> actualSchedule = scheduleRepository.find(TEST_GROUP);
 
-    assertEquals(TEST_GROUP, actualTimeTable.group());
-    Lesson lesson = timeTable.lessons().getFirst();
+    assertTrue(actualSchedule.isPresent());
+    assertEquals(TEST_GROUP, actualSchedule.get().group());
+    Lesson lesson = actualSchedule.get().lessons().getFirst();
     assertEquals(LessonSlot.SECOND, lesson.lessonSlot());
     assertEquals("Комп'ютерне зір", lesson.course().title());
     assertEquals("Левченко Костянтин", lesson.teacher().name());
@@ -88,40 +88,42 @@ class FileTimeTableRepositoryTest {
 
   @Test
   void shouldFindAllTimeTable() {
-    TimeTable firstTimeTable = createTestTimeTable(TEST_GROUP);
-    TimeTable secondTimeTable = createTestTimeTable("CS-101");
-    timetableRepository.createTimeTable(firstTimeTable);
-    timetableRepository.createTimeTable(secondTimeTable);
+    Schedule firstSchedule = createTestTimeTable(TEST_GROUP);
+    Schedule secondSchedule = createTestTimeTable("CS-101");
+    scheduleRepository.create(firstSchedule);
+    scheduleRepository.create(secondSchedule);
 
-    List<TimeTable> actualTimeTables = timetableRepository.findAllTimeTables();
+    List<Schedule> actualSchedules = scheduleRepository.findAll();
 
-    assertEquals(2, actualTimeTables.size());
-    Assertions.assertArrayEquals(new TimeTable[]{firstTimeTable, secondTimeTable}, actualTimeTables.toArray());
+    assertEquals(2, actualSchedules.size());
+    assertTrue(actualSchedules.containsAll(List.of(firstSchedule, secondSchedule)));
   }
 
   @Test
-  void shouldDeleteTimeTable() {
-    TimeTable timeTable = createTestTimeTable(TEST_GROUP);
-    timetableRepository.createTimeTable(timeTable);
+  void shouldDelete() {
+    Schedule schedule = createTestTimeTable(TEST_GROUP);
+    scheduleRepository.create(schedule);
 
-    timetableRepository.deleteTimeTable(TEST_GROUP);
+    scheduleRepository.delete(TEST_GROUP);
 
-    TimeTable actualTimeTable = timetableRepository.findTimeTable(TEST_GROUP);
-    assertNull(actualTimeTable);
+    Optional<Schedule> actualSchedule = scheduleRepository.find(TEST_GROUP);
+    assertTrue(actualSchedule.isEmpty());
   }
 
   @Test
   void shouldDeleteLesson() {
-    TimeTable timeTable = createTestTimeTable(TEST_GROUP);
-    timetableRepository.createTimeTable(timeTable);
+    Schedule schedule = createTestTimeTable(TEST_GROUP);
+    scheduleRepository.create(schedule);
 
-    timetableRepository.deleteLesson(TEST_GROUP, timeTable.lessons().getFirst());
+    scheduleRepository.deleteLesson(TEST_GROUP, schedule.lessons().getFirst());
 
-    assertEquals(3, timetableRepository.findTimeTable(TEST_GROUP).lessons().size());
+    Optional<Schedule> actualSchedule = scheduleRepository.find(TEST_GROUP);
+    assertTrue(actualSchedule.isPresent());
+    assertEquals(3, actualSchedule.get().lessons().size());
   }
 
-  private TimeTable createTestTimeTable(String group) {
-    return new TimeTable(
+  private Schedule createTestTimeTable(String group) {
+    return new Schedule(
         List.of(
             new Lesson(new Course("Комп'ютерне зір"), new Teacher("Левченко Костянтин"), DayOfWeek.FRIDAY, LessonSlot.SECOND),
             new Lesson(new Course("Управління проектами"), new Teacher("Савченко Ірина"), DayOfWeek.FRIDAY, LessonSlot.THIRD),

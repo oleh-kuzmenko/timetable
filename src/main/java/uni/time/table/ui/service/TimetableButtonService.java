@@ -1,4 +1,4 @@
-package uni.time.table.ui.manager;
+package uni.time.table.ui.service;
 
 
 import static uni.time.table.util.TimeTableAppUtil.DEFAULT_FONT;
@@ -16,12 +16,12 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import uni.time.table.model.Lesson;
-import uni.time.table.ui.manager.action.DeleteLessonAction;
+import uni.time.table.ui.action.DeleteLessonAction;
 
-@Component
-public class ButtonManager {
+@Service
+public class TimetableButtonService {
 
   private final Random random = new Random();
 
@@ -38,7 +38,7 @@ public class ButtonManager {
     return button;
   }
 
-  public void setupLessonButton(GridPane gridPane, Button lessonButton, String group, Lesson lesson, DeleteLessonAction deleteLessonAction) {
+  public void setupLessonButton(GridPane timetable, Button lessonButton, String group, Lesson lesson, DeleteLessonAction lessonAction) {
     Text subjectText = new Text(lesson.course().title());
     subjectText.setStyle("-fx-underline: true; -fx-font-weight: bold; -fx-font-size: 11");
     subjectText.setTextAlignment(TextAlignment.CENTER);
@@ -62,7 +62,7 @@ public class ButtonManager {
             -fx-padding: 0;
             -fx-border-radius: 0;""");
     deleteButton.setBlendMode(BlendMode.DARKEN);
-    deleteButton.setOnAction(event -> deleteLessonAction.deleteLesson(gridPane, group, lesson));
+    deleteButton.setOnAction(event -> lessonAction.delete(timetable, group, lesson));
     StackPane.setAlignment(deleteButton, Pos.TOP_RIGHT);
 
     VBox textContainer = new VBox(subjectText, teacherText);
