@@ -44,7 +44,7 @@ public class TimeTableAppUtil {
   }
 
   public static Path groupToPath(String group) {
-    return Path.of(group.concat(TIMETABLE_FILE_NAME_SUFFIX));
+    return Path.of(System.getProperty("user.home"), "timetable", group.concat(TIMETABLE_FILE_NAME_SUFFIX));
   }
 
   public static String pathToGroup(Path file) {

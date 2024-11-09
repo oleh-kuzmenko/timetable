@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,11 +42,11 @@ class FileScheduleRepositoryTest {
   @AfterEach
   void cleanUp() throws IOException {
     List<Path> files = new ArrayList<>();
-    Files.walkFileTree(Paths.get(""), new SimpleFileVisitor<>() {
+    Files.walkFileTree(Paths.get(System.getProperty("user.home"), "timetable"), new SimpleFileVisitor<>() {
       @Override
       public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
         if (file.getFileName().toString().matches(".*-schedule\\.txt")) {
-          files.add(file.getFileName());
+          files.add(file);
         }
         return FileVisitResult.CONTINUE;
       }
@@ -55,13 +56,18 @@ class FileScheduleRepositoryTest {
     }
   }
 
+  @AfterAll
+  static void deleteTimetableDir() throws IOException {
+    Files.deleteIfExists(Paths.get(System.getProperty("user.home"), "timetable"));
+  }
+
   @Test
   void shouldCreate() throws IOException {
     Schedule schedule = createTestTimeTable(TEST_GROUP);
 
     assertDoesNotThrow(() -> scheduleRepository.create(schedule));
 
-    assertTrue(Files.exists(Path.of(TEST_GROUP.concat("-schedule.txt"))));
+    assertTrue(Files.exists(Path.of(System.getProperty("user.home"), "timetable", TEST_GROUP.concat("-schedule.txt"))));
     List<String> lessons = Files.readAllLines(groupToPath(TEST_GROUP));
     assertEquals(4, lessons.size());
     assertEquals("Комп'ютерне зір;Левченко Костянтин;FRIDAY;SECOND", lessons.get(0));
