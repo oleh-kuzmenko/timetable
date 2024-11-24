@@ -42,7 +42,7 @@ class FileScheduleRepositoryTest {
   @AfterEach
   void cleanUp() throws IOException {
     List<Path> files = new ArrayList<>();
-    Files.walkFileTree(Paths.get(System.getProperty("user.home"), "timetable"), new SimpleFileVisitor<>() {
+    Files.walkFileTree(Paths.get(System.getProperty("user.home"), "Documents", "timetable"), new SimpleFileVisitor<>() {
       @Override
       public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
         if (file.getFileName().toString().matches(".*-schedule\\.txt")) {
@@ -58,7 +58,7 @@ class FileScheduleRepositoryTest {
 
   @AfterAll
   static void deleteTimetableDir() throws IOException {
-    Files.deleteIfExists(Paths.get(System.getProperty("user.home"), "timetable"));
+    Files.deleteIfExists(Paths.get(System.getProperty("user.home"), "Documents", "timetable"));
   }
 
   @Test
@@ -67,7 +67,7 @@ class FileScheduleRepositoryTest {
 
     assertDoesNotThrow(() -> scheduleRepository.create(schedule));
 
-    assertTrue(Files.exists(Path.of(System.getProperty("user.home"), "timetable", TEST_GROUP.concat("-schedule.txt"))));
+    assertTrue(Files.exists(Path.of(System.getProperty("user.home"), "Documents", "timetable", TEST_GROUP.concat("-schedule.txt"))));
     List<String> lessons = Files.readAllLines(groupToPath(TEST_GROUP));
     assertEquals(4, lessons.size());
     assertEquals("Комп'ютерне зір;Левченко Костянтин;FRIDAY;SECOND", lessons.get(0));

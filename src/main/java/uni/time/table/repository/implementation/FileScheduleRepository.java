@@ -33,7 +33,7 @@ public class FileScheduleRepository implements ScheduleRepository {
 
   static {
     try {
-      Files.createDirectories(Path.of(System.getProperty("user.home"), "timetable"));
+      Files.createDirectories(Path.of(System.getProperty("user.home"), "Documents", "timetable"));
     } catch (IOException e) {
       LOGGER.warning("Could not create directory: %s".formatted(e.getMessage()));
     }
@@ -76,7 +76,7 @@ public class FileScheduleRepository implements ScheduleRepository {
   public List<Schedule> findAll() {
     List<Path> files = new ArrayList<>();
     try {
-      Files.walkFileTree(Path.of(System.getProperty("user.home"), "timetable"), new SimpleFileVisitor<>() {
+      Files.walkFileTree(Path.of(System.getProperty("user.home"), "Documents", "timetable"), new SimpleFileVisitor<>() {
         @Override
         public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
           if (file.getFileName().toString().matches(".*-schedule.txt")) {
